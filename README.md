@@ -11,19 +11,22 @@
 ## ✨ 功能
 
 - 🎯 **两种模式**
-  - **专注(T · 埋雷)**:可选 `5 / 15 / 25 / 35 / 45` 分钟,恐怖分子(T)主题
-  - **休息(放松)**:可选 `5 / 10 / 15` 分钟,咖啡 ☕ + 青色朴素风
-- 💣 **手绘 C4 炸弹**:专注时显示一颗 SVG 画的 C4(炸药棒 + 引爆器 + 数码屏 + **顶部闪烁红灯**),下方引信进度条随剩余时间收缩
+  - **专注(T · 埋雷)**:可选 `1 / 15 / 25 / 35 / 45` 分钟,恐怖分子(T)主题
+  - **休息(CT · 拆弹)**:可选 `1 / 10 / 15` 分钟,反恐精英(CT)主题 + 青色
+- 💣 **真实 C4 雷包**:专注时显示 CS 1.6 风格的 C4 雷包图(`assets/c4.png`),布防时红光脉冲,下方引信进度条随剩余时间收缩
 - 💥 **起爆特效**:专注归零时白光火球 + 冲击波 + 火星喷溅 + 震屏
 - 🔊 **CS:GO 真实原声**(放在 `sounds/`,HTML5 Audio 播放)
   | 时机 | 音效 |
   |---|---|
   | 埋雷 / 开始专注 | `planted.mp3` — "The bomb has been planted." |
+  | 专注最后 10 秒 | C4 嘀嘀声(Web Audio 合成) |
   | 专注完成起爆 | `explosion.mp3` — 真实 C4 爆炸声 |
   | 专注完成胜利 | `terrorists_win.mp3` — "Terrorists Win!" |
-  | 休息结束 | `ct_win.mp3` — "Counter-Terrorists Win" |
+  | 开始休息 | `go.mp3` — "Go go go!" |
+  | 休息将结束 | `defusing.mp3` — C4 拆弹音 |
+  | 休息结束 | `defused.mp3` — "The bomb has been defused." → `ct_win.mp3` |
 - ⏱️ **最后 10 秒**:时钟变红抖动 + 嘀嘀提示音(DETONATING)
-- 🧑‍✈️ **操作员卡片**:T 武装头像 + 战术 HUD 状态条(LIVE·REC / de_focus / 实时时钟)
+- 🧑‍✈️ **操作员卡片**:T 武装头像 / CT 徽标 + 战术 HUD 状态条(LIVE·REC / Map: De_Focus 2 / 实时时钟)
 - 🏆 **战绩统计**:每完成一次专注 +1 分(Rounds Won)
 - ⌨️ **空格键**一键启动 / 暂停
 - 🔔 完成时弹**系统通知**
@@ -67,7 +70,8 @@ cs-timer/
 ├─ index.html      # 全部界面 + 逻辑(单文件)
 ├─ main.js         # Electron 主进程(建窗口 / 系统通知)
 ├─ preload.js      # 暴露 notify 给渲染进程
-├─ avatars/        # t.png(T 头像;休息用咖啡 emoji,无需图片)
+├─ avatars/        # t.png(T 头像;休息显示 CT 文字徽标)
+├─ assets/         # c4.png(CS 1.6 风格 C4 雷包图)
 ├─ sounds/         # 真实 CS:GO 音效 mp3
 └─ fonts/          # Rajdhani 字体
 ```
@@ -78,8 +82,8 @@ cs-timer/
 
 - [Electron](https://www.electronjs.org/) 33 —— 桌面应用外壳
 - 原生 HTML / CSS / JavaScript —— 界面与逻辑(全在单文件 `index.html`)
-- 内联 SVG —— 手绘 C4 炸弹
-- CSS 动画 —— 起爆火球 / 冲击波 / 震屏
+- CSS 动画 —— 起爆火球 / 冲击波 / 震屏 / C4 布防脉冲
+- AI 生成素材 —— C4 雷包图(nano-banana + 绿幕抠图)
 - Web Audio API —— UI 提示音(实时合成);`sounds/` 内真实 CS:GO 音效走 HTML5 Audio
 - [Rajdhani](https://fonts.google.com/specimen/Rajdhani) 字体 —— 战术数字风
 
