@@ -29,8 +29,8 @@
 ### 方式二:开发模式(改代码时用)
 
 ```bash
-git clone https://github.com/autokcx/cyberpunk-alarm.git
-cd cyberpunk-alarm
+git clone https://github.com/autokcx/cs-timer.git
+cd cs-timer
 npm install
 npm start
 ```
