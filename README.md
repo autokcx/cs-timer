@@ -4,7 +4,7 @@
 
 把「专注」变成一局 CS:GO:开始专注 = **埋下 C4**,顶部红灯闪烁、引信读条,倒计时归零就是一次**起爆**——火球 + 震屏 + 真实 C4 爆炸声 + "Terrorists Win!"。专注结束进入休息,喝杯咖啡 ☕ 放松一下。专治摸鱼。
 
-当前版本:**v1.3.0**
+当前版本:**v1.5.0**
 
 ---
 
@@ -19,14 +19,15 @@
   | 时机 | 音效 |
   |---|---|
   | 埋雷 / 开始专注 | `planted.mp3` — "The bomb has been planted." |
-  | 专注最后 10 秒 | C4 嘀嘀声(Web Audio 合成) |
+  | 专注最后 6 秒 | `c4beep.mp3` — 真实 C4 加速哔声,一路响到爆炸 |
   | 专注完成起爆 | `explosion.mp3` — 真实 C4 爆炸声 |
   | 专注完成胜利 | `terrorists_win.mp3` — "Terrorists Win!" |
   | 开始休息 | `go.mp3` — "Go go go!" |
-  | 休息将结束 | `defusing.mp3` — C4 拆弹音 |
+  | 休息将结束 | `defusing.mp3` — 真实 C4 拆弹器咔哒声 |
   | 休息结束 | `defused.mp3` — "The bomb has been defused." → `ct_win.mp3` |
-- ⏱️ **最后 10 秒**:时钟变红抖动 + 嘀嘀提示音(DETONATING)
-- 🧑‍✈️ **操作员卡片**:T 武装头像 / CT 徽标 + 战术 HUD 状态条(LIVE·REC / Map: De_Focus 2 / 实时时钟)
+- ⏱️ **最后 10 秒**:时钟变红抖动(DETONATING);最后 6 秒 C4 加速哔声一路响到爆炸
+- 🎖 **CS 段位系统**:累计完成的专注局数决定段位(白银 → 黄金 → 守护者 → 传奇之鹰 → 全球精英,共 18 段),头像旁按大类变色;每次升段弹专属庆祝横幅。生涯战绩本地存档,关闭不丢
+- 🧑‍✈️ **操作员卡片**:T 恐怖分子 / CT 特警**真实头像**(绿幕抠图)+ 战术 HUD 状态条(LIVE·REC / Map: De_Focus 2 / 实时时钟)
 - 🏆 **战绩统计**:每完成一次专注 +1 分(Rounds Won)
 - ⌨️ **空格键**一键启动 / 暂停
 - 🔔 完成时弹**系统通知**
@@ -70,7 +71,7 @@ cs-timer/
 ├─ index.html      # 全部界面 + 逻辑(单文件)
 ├─ main.js         # Electron 主进程(建窗口 / 系统通知)
 ├─ preload.js      # 暴露 notify 给渲染进程
-├─ avatars/        # t.png(T 头像;休息显示 CT 文字徽标)
+├─ avatars/        # t.png / ct.png(T 恐怖分子 / CT 特警头像,绿幕抠图)
 ├─ assets/         # c4.png(CS 1.6 风格 C4 雷包图)
 ├─ sounds/         # 真实 CS:GO 音效 mp3
 └─ fonts/          # Rajdhani 字体

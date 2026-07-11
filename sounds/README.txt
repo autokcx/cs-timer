@@ -2,6 +2,7 @@
 
 触发时机 → 文件名：
   埋雷/开始专注   → planted.mp3          ("The bomb has been planted.")
+  专注最后 6 秒    → c4beep.mp3           (真实 C4 加速哔声，一路响到爆炸)
   专注完成起爆     → explosion.mp3        (真实 C4 爆炸声)
   专注完成胜利喊话 → terrorists_win.mp3   ("Terrorists Win!")
   休息结束         → ct_win.mp3           ("Counter-Terrorists Win")

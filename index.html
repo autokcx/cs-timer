@@ -92,7 +92,8 @@
     body.mode-rest .portrait .badge { font-size: 34px; letter-spacing: 1px; }
     .op-info { flex: 1; min-width: 0; }
     .op-side { font-size: 17px; font-weight: 700; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; }
-    .op-status { font-size: 12px; letter-spacing: 3px; color: var(--mute); text-transform: uppercase; margin-top: 3px; }
+    .op-rank { font-size: 12.5px; font-weight: 700; letter-spacing: 1px; margin-top: 3px; color: #b8c0c8; text-transform: uppercase; white-space: nowrap; }
+    .op-status { font-size: 11px; letter-spacing: 2.5px; color: var(--mute); text-transform: uppercase; margin-top: 3px; }
     .op-score { text-align: right; }
     .op-score .num { font-size: 24px; font-weight: 700; color: var(--money); line-height: 1; font-variant-numeric: tabular-nums; }
     .op-score .cap { font-size: 8.5px; letter-spacing: 1.5px; color: var(--mute); text-transform: uppercase; }
@@ -177,15 +178,16 @@
     .icon-btn:hover { background: var(--accent); color: var(--bg); }
 
     /* ── 签名 ── */
-    .sign { text-align: center; margin-top: 9px; font-size: 9.5px; letter-spacing: 2px; color: var(--mute); text-transform: uppercase; }
+    .sign { text-align: center; margin-top: 9px; font-size: 9.5px; letter-spacing: 2px; color: #e2ff32; font-weight: 700; text-transform: uppercase; text-shadow: 0 0 7px rgba(226,255,50,0.65); }
 
     /* ── 爆炸 & 胜利横幅 ── */
-    body.boom .stage { animation: quake 0.6s cubic-bezier(.36,.07,.19,.97); }
+    body.boom .stage { animation: quake 0.8s cubic-bezier(.36,.07,.19,.97); }
     @keyframes quake {
       0%,100%{transform:translate(0,0)}
-      10%{transform:translate(-11px,6px)}  25%{transform:translate(10px,-7px)}
-      40%{transform:translate(-8px,-5px)}  55%{transform:translate(7px,6px)}
-      70%{transform:translate(-5px,3px)}   85%{transform:translate(4px,-2px)}
+      8%{transform:translate(-17px,10px)}  20%{transform:translate(16px,-12px)}
+      33%{transform:translate(-14px,-8px)} 46%{transform:translate(13px,10px)}
+      60%{transform:translate(-9px,5px)}   74%{transform:translate(7px,-4px)}
+      88%{transform:translate(-3px,2px)}
     }
 
     /* ── C4 起爆：白光 + 火球 + 冲击波 + 火星（CSGO 风） ── */
@@ -195,11 +197,21 @@
     .flash > * { position: absolute; will-change: transform, opacity; }
 
     .flash .whiteout { inset: 0; background: #fff; opacity: 0; }
-    .flash.go .whiteout { animation: exWhite 0.5s ease-out forwards; }
-    @keyframes exWhite { 0%{opacity:0} 6%{opacity:0.92} 30%{opacity:0.14} 100%{opacity:0} }
+    .flash.go .whiteout { animation: exWhite 0.65s ease-out forwards; }
+    @keyframes exWhite { 0%{opacity:0} 5%{opacity:1} 20%{opacity:0.2} 42%{opacity:0.55} 100%{opacity:0} }
+
+    /* 升腾黑烟余韵，给爆炸压场分量 */
+    .flash .smoke {
+      width: 300px; height: 300px; border-radius: 50%; opacity: 0;
+      transform: scale(0.3); filter: blur(16px);
+      background: radial-gradient(circle, rgba(70,52,40,0.9) 0%, rgba(32,26,22,0.6) 46%, transparent 72%);
+    }
+    .flash.go .smoke { animation: exSmoke 1.4s ease-out forwards; }
+    @keyframes exSmoke { 0%{opacity:0; transform:scale(0.3) translateY(0)} 22%{opacity:0.85}
+                         100%{opacity:0; transform:scale(2.4) translateY(-46px)} }
 
     .flash .fireball {
-      width: 240px; height: 240px; border-radius: 50%; filter: blur(1.5px);
+      width: 320px; height: 320px; border-radius: 50%; filter: blur(2px);
       opacity: 0; transform: scale(0.2); mix-blend-mode: screen;
       background: radial-gradient(circle,
         #ffffff 0%, #fff2b0 8%, #ffd21a 18%, #ff9500 33%, #ff5a10 47%,
@@ -207,30 +219,32 @@
     }
     .flash.go .fireball { animation: exFire 0.8s cubic-bezier(0.15,0.6,0.3,1) forwards; }
     @keyframes exFire {
-      0%{opacity:0; transform:scale(0.2)} 10%{opacity:1; transform:scale(0.8)}
-      45%{opacity:1; transform:scale(1.12)} 100%{opacity:0; transform:scale(1.5)}
+      0%{opacity:0; transform:scale(0.15)} 8%{opacity:1; transform:scale(0.9)}
+      40%{opacity:1; transform:scale(1.5)} 100%{opacity:0; transform:scale(2.5)}
     }
     /* 超亮内核（起爆瞬间的白热） */
     .flash .core {
-      width: 150px; height: 150px; border-radius: 50%; opacity: 0; transform: scale(0.3);
+      width: 200px; height: 200px; border-radius: 50%; opacity: 0; transform: scale(0.3);
       mix-blend-mode: screen;
       background: radial-gradient(circle, #fff 0%, #fff6d0 32%, #ffcf4a 56%, transparent 74%);
     }
     .flash.go .core { animation: exCore 0.5s ease-out forwards; }
     @keyframes exCore { 0%{opacity:0; transform:scale(0.3)} 12%{opacity:1; transform:scale(1)}
-                        100%{opacity:0; transform:scale(1.4)} }
+                        100%{opacity:0; transform:scale(1.9)} }
 
     .flash .shock {
       width: 60px; height: 60px; border-radius: 50%; opacity: 0; transform: scale(0.3);
       border: 7px solid rgba(255,222,150,0.9);
       box-shadow: 0 0 26px rgba(255,180,80,0.75), inset 0 0 26px rgba(255,180,80,0.5);
     }
-    .flash.go .shock { animation: exShock 0.7s ease-out forwards; }
-    @keyframes exShock { 0%{opacity:0.9; transform:scale(0.3); border-width:9px}
-                         100%{opacity:0; transform:scale(3.6); border-width:1px} }
+    .flash.go .shock { animation: exShock 0.8s ease-out forwards; }
+    .flash .shock2 { border-color: rgba(255,150,60,0.7); }
+    .flash.go .shock2 { animation-delay: 0.14s; }
+    @keyframes exShock { 0%{opacity:0.9; transform:scale(0.3); border-width:10px}
+                         100%{opacity:0; transform:scale(5); border-width:1px} }
 
     .flash .sparks {
-      width: 340px; height: 340px; opacity: 0;
+      width: 470px; height: 470px; opacity: 0;
       background:
         radial-gradient(3px 3px at 20% 30%, #ffd07a, transparent),
         radial-gradient(2px 2px at 80% 25%, #ffb020, transparent),
@@ -243,7 +257,7 @@
     }
     .flash.go .sparks { animation: exSpark 0.85s ease-out forwards; }
     @keyframes exSpark { 0%{opacity:0; transform:scale(0.3)} 15%{opacity:1}
-                         100%{opacity:0; transform:scale(2.3)} }
+                         100%{opacity:0; transform:scale(3.4)} }
     .banner {
       position: fixed; inset: 0; z-index: 41; display: flex; align-items: center; justify-content: center;
       pointer-events: none; opacity: 0;
@@ -251,6 +265,7 @@
     .banner.go { animation: banner 2.6s ease-out forwards; }
     .banner .txt {
       font-weight: 700; font-size: 30px; letter-spacing: 3px; text-transform: uppercase; text-align: center;
+      white-space: pre-line; line-height: 1.15;
       color: var(--banner-color, var(--t));
       text-shadow: 0 0 26px var(--banner-color, var(--t)), 0 3px 10px rgba(0,0,0,0.7);
       padding: 0 10px;
@@ -272,6 +287,7 @@
     </div>
     <div class="op-info">
       <div class="op-side" id="opSide">TERRORISTS</div>
+      <div class="op-rank" id="opRank">白银 I</div>
       <div class="op-status" id="label">专注 · 埋雷阶段</div>
     </div>
     <div class="op-score">
@@ -292,7 +308,7 @@
 
   <div class="modes">
     <button class="mode-btn active" data-mode="work">专注 · T</button>
-    <button class="mode-btn" data-mode="rest">休息</button>
+    <button class="mode-btn" data-mode="rest">休息 · CT</button>
   </div>
 
   <div class="pick" id="workPick">
@@ -320,10 +336,12 @@
 
   <div class="flash" id="flash">
     <div class="whiteout"></div>
+    <div class="smoke"></div>
     <div class="fireball"></div>
     <div class="core"></div>
     <div class="sparks"></div>
     <div class="shock"></div>
+    <div class="shock shock2"></div>
   </div>
   <div class="banner" id="banner"><div class="txt" id="bannerTxt"></div></div>
 
@@ -341,19 +359,49 @@
     const MODES = {
       work: { side: 'TERRORISTS',    label: '专注 · 埋雷阶段', title: '专注',
               site: 'BOMBSITE · A',   start: '● 埋雷 PLANT',   armed: 'C4 ARMED',
-              badge: 'T',             banner: 'TERRORISTS WIN', bannerColor: 'var(--t)' },
+              badge: 'T',  avatar: 'avatars/t.png',  banner: 'TERRORISTS WIN', bannerColor: 'var(--t)' },
       rest: { side: '休息中',         label: '休息 · 放松一下', title: '休息',
               site: 'LOUNGE · 休息区', start: '▶ 开始休息 REST', armed: 'RESTING',
-              badge: 'CT',            banner: '休息结束',       bannerColor: 'var(--rest)' },
+              badge: 'CT', avatar: 'avatars/ct.png', banner: '休息结束',       bannerColor: 'var(--rest)' },
     };
-    const DANGER_SECS = 10;                          // 最后 10 秒进入起爆状态
+
+    // CS 段位阶梯：min = 达到该段位所需的「累计完成专注局数」，color 按段位大类走
+    const SILVER = '#b8c0c8', GOLD = '#e0b23c', GUARD = '#4fb0a5', EAGLE = '#9b6cff', GLOBAL = '#38d0ff';
+    const RANKS = [
+      { min: 0,   name: '白银 I',        color: SILVER },
+      { min: 2,   name: '白银 II',       color: SILVER },
+      { min: 4,   name: '白银 III',      color: SILVER },
+      { min: 7,   name: '白银 IV',       color: SILVER },
+      { min: 10,  name: '白银大师',      color: SILVER },
+      { min: 14,  name: '白银大师精英',  color: SILVER },
+      { min: 18,  name: '黄金新星 I',    color: GOLD   },
+      { min: 23,  name: '黄金新星 II',   color: GOLD   },
+      { min: 28,  name: '黄金新星 III',  color: GOLD   },
+      { min: 34,  name: '黄金新星大师',  color: GOLD   },
+      { min: 40,  name: '守护者 I',      color: GUARD  },
+      { min: 47,  name: '守护者 II',     color: GUARD  },
+      { min: 55,  name: '守护者精英',    color: GUARD  },
+      { min: 64,  name: '卓越守护者',    color: GUARD  },
+      { min: 74,  name: '传奇之鹰',      color: EAGLE  },
+      { min: 85,  name: '传奇之鹰大师',  color: EAGLE  },
+      { min: 100, name: '至高职业大师',  color: GLOBAL },
+      { min: 120, name: '全球精英',      color: GLOBAL },
+    ];
+    // 返回 { rank, next }：当前段位 + 下一段位（已封顶则 next 为 null）
+    function rankInfo(wins) {
+      const i = RANKS.findLastIndex((r) => wins >= r.min);   // RANKS[0].min=0，必有匹配
+      return { rank: RANKS[i], next: RANKS[i + 1] || null };
+    }
+
+    const DANGER_SECS = 10;                          // 最后 10 秒进入起爆（红屏抖动）
+    const C4_BEEP_SECS = 6;                          // 真实 C4 加速哔声时长(≈6s)，最后 6 秒一路响到爆炸
     const durOf = (m) => (m === 'work' ? focusMin : restMin) * 60;
 
     let mode = 'work';
     let remaining = durOf(mode);
     let timerId = null;
     let running = false;
-    let completed = 0;
+    let completed = Number(localStorage.getItem('wins')) || 0;   // 累计完成的专注局数（生涯战绩，决定段位）
 
     const timeEl = document.getElementById('time');
     const labelEl = document.getElementById('label');
@@ -361,6 +409,7 @@
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
     const scoreEl = document.getElementById('scoreNum');
+    const rankEl = document.getElementById('opRank');
     const statusText = document.getElementById('statusText');
     const fuseEl = document.getElementById('fuse');
     const siteEl = document.getElementById('siteTag');
@@ -373,7 +422,7 @@
     const flashEl = document.getElementById('flash');
     const bannerEl = document.getElementById('banner');
     const bannerTxtEl = document.getElementById('bannerTxt');
-    avatarImg.onerror = () => { avatarImg.style.display = 'none'; };  // 只需设一次
+    avatarImg.onerror = () => { avatarImg.style.display = 'none'; avatarBadge.style.display = ''; };  // 图裂了才回退文字徽标
 
     const pad2 = (n) => String(n).padStart(2, '0');
     const fmt = (s) => `${pad2(Math.floor(s / 60))}:${pad2(s % 60)}`;
@@ -386,6 +435,9 @@
       labelEl.textContent = m.label;
       sideEl.textContent = m.side;
       scoreEl.textContent = completed;
+      const { rank } = rankInfo(completed);
+      rankEl.textContent = rank.name;
+      rankEl.style.color = rank.color;
       document.title = `${t} · ${m.title}`;
 
       const isWork = mode === 'work';
@@ -406,11 +458,11 @@
     function tick() {
       remaining--;
       if (remaining <= 0) { finish(); return; }
-      if (mode === 'work' && remaining <= DANGER_SECS) c4beep(remaining);
+      if (mode === 'work' && remaining === C4_BEEP_SECS) playClip('c4beep');  // 真实 C4 加速哔声，一次播到爆炸
       if (mode === 'rest' && remaining === 3) playClip('defusing');   // 休息将结束：拆弹中
       render();
     }
-    function stopTimer() { running = false; clearInterval(timerId); timerId = null; }
+    function stopTimer() { running = false; clearInterval(timerId); timerId = null; stopClip('c4beep'); }
     function start() {
       if (running) return;
       running = true;
@@ -445,33 +497,41 @@
 
     function updateAvatar() {
       avatarBadge.textContent = MODES[mode].badge;
-      if (mode === 'work') {
-        avatarImg.src = 'avatars/t.png';
-        avatarImg.style.display = 'block';  // 已缓存，直接显示（src 不变时 onload 不会再触发）
-      } else {
-        avatarImg.style.display = 'none';   // 休息就是休息，不显示特警
-      }
+      avatarImg.src = MODES[mode].avatar;   // 专注=T，休息=CT 特警（路径集中在 MODES）
+      avatarImg.style.display = 'block';
+      avatarBadge.style.display = 'none';   // 有真实头像图，就不显示文字徽标
     }
 
     function finish() {
       stopTimer();
       remaining = 0; render();
-      let title, body, next;
+      let title, body, next, bannerText, bannerColor;
       if (mode === 'work') {
         completed++;
+        localStorage.setItem('wins', completed);
+        const info = rankInfo(completed);
+        const rankedUp = info.rank.min === completed;   // 累计局数落在某段位阈值上 = 刚升段
         next = 'rest';
-        title = '💣 起爆成功 · 专注完成';
-        body = `Terrorists Win! 休息 ${restMin} 分钟，放松一下。`;
+        title = rankedUp ? `⬆ 段位提升 · ${info.rank.name}` : '💣 起爆成功 · 专注完成';
+        body = rankedUp
+          ? `Terrorists Win! 晋级到「${info.rank.name}」🎖 休息 ${restMin} 分钟。`
+          : (info.next
+              ? `Terrorists Win! 距「${info.next.name}」还差 ${info.next.min - completed} 局。`
+              : `Terrorists Win! 已封顶 · 全球精英 👑`);
+        bannerText  = rankedUp ? '⬆ 段位提升\n' + info.rank.name : MODES.work.banner;
+        bannerColor = rankedUp ? info.rank.color : MODES.work.bannerColor;
         boom();
         setTimeout(() => playClip('terrorists_win'), 900); // 爆炸声后再喊胜利
       } else {
         next = 'work';
         title = '☕ 休息结束';
         body = '回来啦 — 埋下下一颗 C4。';
+        bannerText = MODES.rest.banner;
+        bannerColor = MODES.rest.bannerColor;
         playClip('defused');                        // "The bomb has been defused."
         setTimeout(() => playClip('ct_win'), 1900); // 随后：Counter-Terrorists Win
       }
-      winBanner(MODES[mode].banner, MODES[mode].bannerColor);
+      winBanner(bannerText, bannerColor);
       if (window.pomodoro) window.pomodoro.notify(title, body);
       switchMode(next);
     }
@@ -504,16 +564,13 @@
         o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
       } catch (e) {}
     }
-    // C4 倒计时嘀声（最后 3 秒双响）
-    function c4beep(sec) {
-      blip(1500, 0.05, 'square');
-      if (sec <= 3) setTimeout(() => blip(1500, 0.05, 'square'), 210);
-    }
+    // 停止某个已缓存音效（计时暂停/重置/切换时掐掉 C4 哔声）
+    function stopClip(name) { const a = CLIPS[name]; if (a) { a.pause(); a.currentTime = 0; } }
     // 爆炸：真实 C4 爆炸声 + 白光火球 + 震屏
     function boom() {
       retrigger(flashEl);
       document.body.classList.add('boom');
-      setTimeout(() => document.body.classList.remove('boom'), 620);
+      setTimeout(() => document.body.classList.remove('boom'), 820);
       playClip('explosion');
     }
     // 胜利横幅（颜色走 CSS 变量，样式由 .banner .txt 统一定义）
