@@ -241,16 +241,16 @@
       timerId = setInterval(tick, 1000);
       cue('start'); render();
     }
+    function stopTimer() { running = false; clearInterval(timerId); timerId = null; }
     function pause() {
       const was = running;
-      running = false;
-      clearInterval(timerId); timerId = null;
+      stopTimer();
       if (was) cue('pause');
       render();
     }
     function toggle() { running ? pause() : start(); }
     function reset() { const w = running; pause(); remaining = DURATIONS[mode]; if (!w) cue('reset'); render(); }
-    function switchMode(next, silent) { mode = next; running = false; clearInterval(timerId); timerId = null; remaining = DURATIONS[mode]; if (!silent) blip(660, 0.05); render(); }
+    function switchMode(next, silent) { mode = next; stopTimer(); remaining = DURATIONS[mode]; if (!silent) blip(660, 0.05); render(); }
 
     function finish() {
       pause();
