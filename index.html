@@ -251,7 +251,8 @@
     .banner.go { animation: banner 2.6s ease-out forwards; }
     .banner .txt {
       font-weight: 700; font-size: 30px; letter-spacing: 3px; text-transform: uppercase; text-align: center;
-      color: var(--t); text-shadow: 0 0 26px rgba(216,164,65,0.9), 0 3px 10px rgba(0,0,0,0.7);
+      color: var(--banner-color, var(--t));
+      text-shadow: 0 0 26px var(--banner-color, var(--t)), 0 3px 10px rgba(0,0,0,0.7);
       padding: 0 10px;
     }
     @keyframes banner { 0%{opacity:0; transform:scale(0.7)} 12%{opacity:1; transform:scale(1)} 80%{opacity:1} 100%{opacity:0} }
@@ -260,12 +261,12 @@
 <body class="mode-work">
   <div class="statusbar">
     <span class="live"><span class="dot">●</span> LIVE · REC</span>
-    <span class="map" id="mapTag">de_focus</span>
+    <span class="map">de_focus</span>
     <span id="clockText">--:--</span>
   </div>
 
   <div class="operator">
-    <div class="portrait" id="portrait">
+    <div class="portrait">
       <img id="avatarImg" alt="" />
       <span class="badge" id="avatarBadge">T</span>
     </div>
@@ -281,7 +282,7 @@
 
   <div class="stage">
     <div class="site" id="siteTag">BOMBSITE · A</div>
-    <div class="clock" id="time" data-t="25:00">25:00</div>
+    <div class="clock" id="time">25:00</div>
     <div class="c4dev">
       <svg class="c4icon" viewBox="0 0 52 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <!-- 炸药棒（4 根捆在一起） -->
@@ -317,7 +318,7 @@
   </div>
 
   <div class="pick" id="workPick">
-    <button class="pick-btn" data-min="5">5</button>
+    <button class="pick-btn" data-min="1">1</button>
     <button class="pick-btn" data-min="15">15</button>
     <button class="pick-btn" data-min="25">25</button>
     <button class="pick-btn" data-min="35">35</button>
@@ -326,7 +327,7 @@
   </div>
 
   <div class="pick" id="restPick">
-    <button class="pick-btn" data-min="5">5</button>
+    <button class="pick-btn" data-min="1">1</button>
     <button class="pick-btn" data-min="10">10</button>
     <button class="pick-btn" data-min="15">15</button>
     <span class="pick-unit">MIN</span>
@@ -350,20 +351,28 @@
 
   <script>
     /* ---------- 配置 ---------- */
-    const FOCUS_OPTIONS = [5, 15, 25, 35, 45];
-    const REST_OPTIONS  = [5, 10, 15];
+    const FOCUS_OPTIONS = [1, 15, 25, 35, 45];  // DEBUG: 1 分钟（原 5）
+    const REST_OPTIONS  = [1, 10, 15];          // DEBUG: 1 分钟（原 5）
 
     let focusMin = Number(localStorage.getItem('focusMin')) || 25;
     if (!FOCUS_OPTIONS.includes(focusMin)) focusMin = 25;
-    let restMin = Number(localStorage.getItem('restMin')) || 5;
-    if (!REST_OPTIONS.includes(restMin)) restMin = 5;
+    let restMin = Number(localStorage.getItem('restMin')) || 1;
+    if (!REST_OPTIONS.includes(restMin)) restMin = 1;
 
-    const DURATIONS = { work: focusMin * 60, rest: restMin * 60 };
-    const SIDE   = { work: 'TERRORISTS',   rest: '休息中' };
-    const LABELS = { work: '专注 · 埋雷阶段', rest: '休息 · 放松一下' };
+    // 每个模式的全部展示数据（集中管理，去掉散落各处的 isWork 三元）
+    const MODES = {
+      work: { side: 'TERRORISTS',    label: '专注 · 埋雷阶段', title: '专注',
+              site: 'BOMBSITE · A',   start: '● 埋雷 PLANT',   armed: 'C4 ARMED',
+              badge: 'T',             banner: 'TERRORISTS WIN', bannerColor: 'var(--t)' },
+      rest: { side: '休息中',         label: '休息 · 放松一下', title: '休息',
+              site: 'LOUNGE · 休息区', start: '▶ 开始休息 REST', armed: 'RESTING',
+              badge: '☕',            banner: '休息结束',       bannerColor: 'var(--rest)' },
+    };
+    const DANGER_SECS = 10;                          // 最后 10 秒进入起爆状态
+    const durOf = (m) => (m === 'work' ? focusMin : restMin) * 60;
 
     let mode = 'work';
-    let remaining = DURATIONS[mode];
+    let remaining = durOf(mode);
     let timerId = null;
     let running = false;
     let completed = 0;
@@ -383,39 +392,43 @@
     const restBtns = document.querySelectorAll('#restPick .pick-btn');
     const avatarImg = document.getElementById('avatarImg');
     const avatarBadge = document.getElementById('avatarBadge');
+    const flashEl = document.getElementById('flash');
+    const bannerEl = document.getElementById('banner');
+    const bannerTxtEl = document.getElementById('bannerTxt');
+    avatarImg.onerror = () => { avatarImg.style.display = 'none'; };  // 只需设一次
 
-    const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const fmt = (s) => `${pad2(Math.floor(s / 60))}:${pad2(s % 60)}`;
+    const setActive = (nodes, pred) => nodes.forEach((n) => n.classList.toggle('active', pred(n)));
+    const retrigger = (el) => { el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); };
 
     function render() {
-      const t = fmt(remaining);
-      timeEl.textContent = t; timeEl.dataset.t = t;
-      labelEl.textContent = LABELS[mode];
-      sideEl.textContent = SIDE[mode];
+      const t = fmt(remaining), m = MODES[mode];
+      timeEl.textContent = t;
+      labelEl.textContent = m.label;
+      sideEl.textContent = m.side;
       scoreEl.textContent = completed;
-      document.title = `${t} · ${mode === 'work' ? '专注' : '休息'}`;
+      document.title = `${t} · ${m.title}`;
 
       const isWork = mode === 'work';
-      const danger = isWork && running && remaining <= 10 && remaining > 0;
+      const danger = isWork && running && remaining <= DANGER_SECS && remaining > 0;
       document.body.classList.toggle('mode-work', isWork);
       document.body.classList.toggle('mode-rest', !isWork);
       document.body.classList.toggle('danger', danger);
       document.body.classList.toggle('running', running);
-      modeBtns.forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+      setActive(modeBtns, (b) => b.dataset.mode === mode);
 
-      startBtn.textContent = running
-        ? '❚❚ 暂停 HOLD'
-        : (isWork ? '● 埋雷 PLANT' : '▶ 开始休息 REST');
-      siteEl.textContent = isWork ? 'BOMBSITE · A' : 'LOUNGE · 休息区';
-      statusText.textContent = danger ? 'DETONATING'
-        : (running ? (isWork ? 'C4 ARMED' : 'RESTING') : 'STANDBY');
+      startBtn.textContent = running ? '❚❚ 暂停 HOLD' : m.start;
+      siteEl.textContent = m.site;
+      statusText.textContent = danger ? 'DETONATING' : (running ? m.armed : 'STANDBY');
 
-      fuseEl.style.width = (100 * remaining / DURATIONS[mode]) + '%';
+      fuseEl.style.width = (100 * remaining / durOf(mode)) + '%';
     }
 
     function tick() {
       remaining--;
       if (remaining <= 0) { finish(); return; }
-      if (mode === 'work' && remaining <= 10) c4beep(remaining);
+      if (mode === 'work' && remaining <= DANGER_SECS) c4beep(remaining);
       render();
     }
     function stopTimer() { running = false; clearInterval(timerId); timerId = null; }
@@ -434,10 +447,10 @@
       render();
     }
     function toggle() { running ? pause() : start(); }
-    function reset() { stopTimer(); remaining = DURATIONS[mode]; blip(420, 0.05); render(); }
+    function reset() { stopTimer(); remaining = durOf(mode); blip(420, 0.05); render(); }
 
     function switchMode(next) {
-      mode = next; stopTimer(); remaining = DURATIONS[mode];
+      mode = next; stopTimer(); remaining = durOf(mode);
       updateAvatar(); blip(560, 0.05); render();
     }
 
@@ -445,22 +458,19 @@
     function setDuration(kind, min, buttons) {
       if (kind === 'work') { focusMin = min; localStorage.setItem('focusMin', min); }
       else                 { restMin  = min; localStorage.setItem('restMin',  min); }
-      DURATIONS[kind] = min * 60;
-      if (mode === kind && !running) remaining = DURATIONS[kind];
-      buttons.forEach((b) => b.classList.toggle('active', Number(b.dataset.min) === min));
+      if (mode === kind && !running) remaining = durOf(kind);
+      setActive(buttons, (b) => Number(b.dataset.min) === min);
       blip(640, 0.04);
       render();
     }
 
     function updateAvatar() {
+      avatarBadge.textContent = MODES[mode].badge;
       if (mode === 'work') {
-        avatarBadge.textContent = 'T';
-        avatarImg.onerror = () => { avatarImg.style.display = 'none'; };
         avatarImg.src = 'avatars/t.png';
         avatarImg.style.display = 'block';  // 已缓存，直接显示（src 不变时 onload 不会再触发）
       } else {
         avatarImg.style.display = 'none';   // 休息就是休息，不显示特警
-        avatarBadge.textContent = '☕';
       }
     }
 
@@ -474,15 +484,14 @@
         title = '💣 起爆成功 · 专注完成';
         body = `Terrorists Win! 休息 ${restMin} 分钟，放松一下。`;
         boom();
-        winBanner('TERRORISTS WIN', 'var(--t)');
         setTimeout(() => playClip('terrorists_win'), 900); // 爆炸声后再喊胜利
       } else {
         next = 'work';
         title = '☕ 休息结束';
         body = '回来啦 — 埋下下一颗 C4。';
         playClip('ct_win');
-        winBanner('休息结束', 'var(--rest)');
       }
+      winBanner(MODES[mode].banner, MODES[mode].bannerColor);
       if (window.pomodoro) window.pomodoro.notify(title, body);
       switchMode(next);
     }
@@ -491,11 +500,13 @@
     let actx = null;
     function ac() { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); return actx; }
 
-    // 播放真实 CS 原声（sounds/NAME.mp3）
+    // 播放真实 CS 原声（sounds/NAME.mp3，缓存复用，避免每次重新解码 + 稳定时序）
+    const CLIPS = {};
     function playClip(name, volume = 1) {
       try {
-        const a = new Audio('sounds/' + name + '.mp3');
+        const a = CLIPS[name] || (CLIPS[name] = new Audio('sounds/' + name + '.mp3'));
         a.volume = volume;
+        a.currentTime = 0;
         const p = a.play();
         if (p && p.catch) p.catch(() => {});
       } catch (e) {}
@@ -520,25 +531,21 @@
     }
     // 爆炸：真实 C4 爆炸声 + 白光火球 + 震屏
     function boom() {
-      const flash = document.getElementById('flash');
-      flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+      retrigger(flashEl);
       document.body.classList.add('boom');
       setTimeout(() => document.body.classList.remove('boom'), 620);
       playClip('explosion');
     }
-    // 胜利横幅
+    // 胜利横幅（颜色走 CSS 变量，样式由 .banner .txt 统一定义）
     function winBanner(text, color) {
-      const banner = document.getElementById('banner');
-      const txt = document.getElementById('bannerTxt');
-      txt.textContent = text;
-      txt.style.color = color;
-      txt.style.textShadow = `0 0 26px ${color}, 0 3px 10px rgba(0,0,0,0.7)`;
-      banner.classList.remove('go'); void banner.offsetWidth; banner.classList.add('go');
+      bannerTxtEl.textContent = text;
+      bannerTxtEl.style.setProperty('--banner-color', color);
+      retrigger(bannerEl);
     }
     // 顶部小时钟（真实时间）
     function tickWall() {
       const d = new Date();
-      wallEl.textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      wallEl.textContent = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
     }
 
     /* ---------- 事件绑定 ---------- */
@@ -555,7 +562,6 @@
     setDuration('rest', restMin, restBtns);
     updateAvatar();
     tickWall(); setInterval(tickWall, 1000);
-    render();
   </script>
 </body>
 </html>
